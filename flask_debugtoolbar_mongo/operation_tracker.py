@@ -54,13 +54,12 @@ def _get_stacktrace():
 # Wrap Cursor._refresh for getting queries
 @functools.wraps(_original_methods['insert'])
 def _insert(collection_self, doc_or_docs, manipulate=True,
-            safe=False, check_keys=True, **kwargs):
+            check_keys=True, **kwargs):
     start_time = time.time()
     result = _original_methods['insert'](
         collection_self,
         doc_or_docs,
         manipulate=manipulate,
-        safe=safe,
         check_keys=check_keys,
         **kwargs
     )
@@ -69,7 +68,6 @@ def _insert(collection_self, doc_or_docs, manipulate=True,
     __traceback_hide__ = True
     inserts.append({
         'document': doc_or_docs,
-        'safe': safe,
         'time': total_time,
         'stack_trace': _get_stacktrace(),
     })
@@ -78,14 +76,13 @@ def _insert(collection_self, doc_or_docs, manipulate=True,
 # Wrap Cursor._refresh for getting queries
 @functools.wraps(_original_methods['update'])
 def _update(collection_self, spec, document, upsert=False,
-            maniuplate=False, safe=False, multi=False, **kwargs):
+            maniuplate=False, multi=False, **kwargs):
     start_time = time.time()
     result = _original_methods['update'](
         collection_self,
         spec,
         document,
         upsert=upsert,
-        safe=safe,
         multi=multi,
         **kwargs
     )
@@ -97,7 +94,6 @@ def _update(collection_self, spec, document, upsert=False,
         'upsert': upsert,
         'multi': multi,
         'spec': spec,
-        'safe': safe,
         'time': total_time,
         'stack_trace': _get_stacktrace(),
     })
@@ -105,12 +101,11 @@ def _update(collection_self, spec, document, upsert=False,
 
 # Wrap Cursor._refresh for getting queries
 @functools.wraps(_original_methods['remove'])
-def _remove(collection_self, spec_or_id, safe=False, **kwargs):
+def _remove(collection_self, spec_or_id, **kwargs):
     start_time = time.time()
     result = _original_methods['remove'](
         collection_self,
         spec_or_id,
-        safe=safe,
         **kwargs
     )
     total_time = (time.time() - start_time) * 1000
@@ -118,7 +113,6 @@ def _remove(collection_self, spec_or_id, safe=False, **kwargs):
     __traceback_hide__ = True
     removes.append({
         'spec_or_id': spec_or_id,
-        'safe': safe,
         'time': total_time,
         'stack_trace': _get_stacktrace(),
     })
