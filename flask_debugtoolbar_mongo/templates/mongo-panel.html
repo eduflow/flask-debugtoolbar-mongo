@@ -256,6 +256,58 @@ table.mongo-op-table tbody {
 <p>No removes recorded</p>
 {% endif %}
 
+<h4>Saves</h4>
+{% if saves %}
+<table class="mongo-op-table">
+    <thead>
+        <tr>
+            <th>Time (ms)</th>
+            <th style="width: 100%">Document</th>
+            <th>Safe</th>
+            <th>Stack Trace</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for save in saves %}
+            <tr class="{{ loop.cycle('djDebugOdd', 'djDebugEven') }}">
+                <td>{{ "%.4f"|format(save.time|float) }}</td>
+                <td>
+                    <pre class="mongo-highlight">{{ save.document|format_dict(120)|highlight("javascript")|safe }}</pre>
+                </td>
+                <td>{{ save.safe }}</td>
+                <td><a href="javascript:void(0);" class="mongo-toggle-trace" data-row="saves-{{ loop.index }}">Toggle</a></td>
+            </tr>
+            <tr class="{{ loop.cycle('djDebugOdd', 'djDebugEven') }}">
+                <td colspan="4">
+                    <table class="mongo-stack-trace "id="mongo-stack-trace-saves-{{ loop.index }}">
+                        <thead>
+                            <tr>
+                                <th>Line</th>
+                                <th>File</th>
+                                <th>Function</th>
+                                <th>Code</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for line in save.stack_trace %}
+                            <tr>
+                                <td class="lineno">{{ line.1 }}</td>
+                                <td class="file">{{ line.0|embolden_file|safe }}</td>
+                                <td class="function">{{ line.2 }}</td>
+                                <td class="code">{{ line.3|highlight("python")|safe }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No saves recorded</p>
+{% endif %}
+
 <script>
 (function() {
     var toggleButtons = document.querySelectorAll('a.mongo-toggle-trace');

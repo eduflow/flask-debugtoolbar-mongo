@@ -55,6 +55,11 @@ class MongoDebugPanel(DebugPanel):
             ctx['count'] += len(operation_tracker.removes)
             ctx['time'] += sum(x['time'] for x in operation_tracker.removes)
 
+        if operation_tracker.saves:
+            ctx['operations'].append(fun('save', operation_tracker.saves))
+            ctx['count'] += len(operation_tracker.saves)
+            ctx['time'] += sum(x['time'] for x in operation_tracker.saves)
+
         ctx['time'] = '%.2f' % ctx['time']
         return self.render('debug_tb_mongo/mongo-panes-subtitle.html', ctx)
 
@@ -70,4 +75,5 @@ class MongoDebugPanel(DebugPanel):
         context['inserts'] = operation_tracker.inserts
         context['updates'] = operation_tracker.updates
         context['removes'] = operation_tracker.removes
+        context['saves'] = operation_tracker.saves
         return self.render('debug_tb_mongo/mongo-panel.html', context)

@@ -19,6 +19,7 @@ _original_methods = {
     'insert': pymongo.collection.Collection.insert,
     'update': pymongo.collection.Collection.update,
     'remove': pymongo.collection.Collection.remove,
+    'save': pymongo.collection.Collection.save,
     'refresh': pymongo.cursor.Cursor._refresh,
 }
 
@@ -26,6 +27,7 @@ queries = []
 inserts = []
 updates = []
 removes = []
+saves = []
 
 def WANT_STACK_TRACE():
     return current_app.config.get('DEBUG_TB_MONGO', {}).get('SHOW_STACKTRACES', True)
@@ -70,6 +72,28 @@ def _insert(collection_self, doc_or_docs, manipulate=True,
     inserts.append({
         'document': doc_or_docs,
         'safe': safe,
+        'time': total_time,
+        'stack_trace': _get_stacktrace(),
+    })
+    return result
+
+# Wrap Cursor._refresh for getting queries
+@functools.wraps(_original_methods['save'])
+def _save(collection_self, doc_or_docs, manipulate=True,
+            check_keys=True, **kwargs):
+    start_time = time.time()
+    result = _original_methods['save'](
+        collection_self,
+        doc_or_docs,
+        manipulate=manipulate,
+        check_keys=check_keys,
+        **kwargs
+    )
+    total_time = (time.time() - start_time) * 1000
+
+    __traceback_hide__ = True
+    saves.append({
+        'document': doc_or_docs,
         'time': total_time,
         'stack_trace': _get_stacktrace(),
     })
@@ -195,6 +219,8 @@ def install_tracker():
         pymongo.collection.Collection.update = _update
     if pymongo.collection.Collection.remove != _remove:
         pymongo.collection.Collection.remove = _remove
+    if pymongo.collection.Collection.save != _save:
+        pymongo.collection.Collection.save = _save
     if pymongo.cursor.Cursor._refresh != _cursor_refresh:
         pymongo.cursor.Cursor._refresh = _cursor_refresh
 
@@ -206,16 +232,19 @@ def uninstall_tracker():
         pymongo.collection.Collection.update = _original_methods['update']
     if pymongo.collection.Collection.remove == _remove:
         pymongo.collection.Collection.remove = _original_methods['remove']
+    if pymongo.collection.Collection.save == _save:
+        pymongo.collection.Collection.save = _original_methods['save']
     if pymongo.cursor.Cursor._refresh == _cursor_refresh:
         pymongo.cursor.Cursor._refresh = _original_methods['cursor_refresh']
 
 
 def reset():
-    global queries, inserts, updates, removes
+    global queries, inserts, updates, removes, saves
     queries = []
     inserts = []
     updates = []
     removes = []
+    saves = []
 
 
 def _get_ordering(son):
