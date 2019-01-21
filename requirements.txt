@@ -1,3 +1,4 @@
 Flask==0.9
 Flask-DebugToolbar==0.8.0
-pymongo==2.4.2
+pymongo==3.7.1
+pymongo-basic-profiler==3.7.1

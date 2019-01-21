@@ -9,13 +9,14 @@ setup(
     author_email='bruno@bcarlin.net',
     url='https://github.com/bcarlin/flask-debugtoolbar-mongo',
     license='MIT',
-    packages=find_packages(exclude=('example', )),
+    packages=find_packages(exclude=('example',)),
     include_package_data=True,
     zip_safe=False,
     setup_requires=[
         'Flask>=0.8',
         'pymongo',
         'Flask-DebugToolbar',
+        'pymongo-basic-profiler',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
